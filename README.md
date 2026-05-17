@@ -36,8 +36,8 @@ Both are rebindable in **Settings → Shortcuts**.
 ## Build
 
 ```sh
-git clone https://github.com/your-username/MacMenu-.git
-cd MacMenu-
+git clone https://github.com/irfanmokhtar/MacMenuPlus.git
+cd MacMenuPlus
 
 # Open in Xcode
 open "MacMenu+.xcodeproj"
