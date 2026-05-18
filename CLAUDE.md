@@ -69,7 +69,11 @@ Chromium/Electron quirk: lazy-AX apps return empty `kAXWindowsAttribute`. `fetch
 
 `Services/WindowActivator.activate(entry)` → `NSRunningApplication.activate()` for app focus, then if AX-trusted: unminimize (`kAXMinimizedAttribute = false`) and `kAXRaiseAction`. Fallback path matches by title when `entry.axWindow` is nil.
 
-`Features/AppSwitcher/AppSwitcherHUD.swift` — floating `NSPanel` (subclass `KeyablePanel` overrides `canBecomeKey`). Local `NSEvent` monitor handles Tab/Shift-Tab/arrows/Return/Esc. `selectedIndex` defaults to `1` so a single Tab press jumps to the next window (classic ⌘-Tab behavior).
+`Features/AppSwitcher/AppSwitcherHUD.swift` — floating `NSPanel` (subclass `KeyablePanel` overrides `canBecomeKey`). Local `NSEvent` monitor handles Tab/Shift-Tab/arrows/Return/Esc. `selectedIndex` defaults to `1` so a single Tab press jumps to the next window (classic ⌘-Tab behavior). Panel width 540pt; `hostedHeight()` computes from `rowHeight=64`, `chrome=110`, capped at 10 rows then scrolls.
+
+`Features/AppSwitcher/WindowRowView.swift` is shared between the menu-bar panel section and the HUD via a `Style` enum (`.compact` / `.expanded`). All sizing metrics (icon, fonts, padding, corner radius, selection opacity) switch on `style`. Default is `.compact`; `AppSwitcherHUDView` passes `.expanded`. When tweaking row appearance, edit *both* branches or you'll break one surface.
+
+`Features/AppSwitcher/AppSwitcherPanelSection.swift` has a user-resizable list height: `@AppStorage("appSwitcherListHeight")` (default 220, clamp 120…600). Drag handle below the `ScrollView` accumulates `dragDelta` during `DragGesture` and writes `listHeight` on `onEnded`. `NSCursor.resizeUpDown.push()/pop()` on hover.
 
 ### Permissions
 
@@ -83,4 +87,5 @@ App is non-sandboxed (`MacMenu+/MacMenuPlus.entitlements` is empty `<dict/>`); d
 
 - `internal import AppKit` (Swift 5.9+ access-level imports) is used everywhere AppKit is referenced — keep the modifier; bare `import AppKit` will leak symbols out of the module for files compiled with stricter access checks.
 - Print logging via `[Switcher] …` lines in `WindowEnumerator` is intentional diagnostic output for the AX correlation path. Leave or gate behind a flag; do not silently delete when debugging unrelated issues.
-- No persistence layer — clipboard history is in-memory and cleared on quit (surfaced in Settings UI).
+- No persistence layer for clipboard history — in-memory, cleared on quit (surfaced in Settings UI).
+- UI-state persistence is limited to `@AppStorage` keys (UserDefaults-backed): `appSwitcherListHeight` (resizable open-windows section). Hotkey bindings persist via `KeyboardShortcuts` (also UserDefaults). No custom persistence service.

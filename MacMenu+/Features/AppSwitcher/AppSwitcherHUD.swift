@@ -48,7 +48,7 @@ final class AppSwitcherHUD {
 
     private func makePanel() -> NSPanel {
         let panel = KeyablePanel(
-            contentRect: NSRect(x: 0, y: 0, width: 460, height: 200),
+            contentRect: NSRect(x: 0, y: 0, width: 540, height: 200),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -75,7 +75,7 @@ final class AppSwitcherHUD {
             }
         )
         let hosting = NSHostingView(rootView: view)
-        hosting.frame = NSRect(x: 0, y: 0, width: 460, height: hostedHeight())
+        hosting.frame = NSRect(x: 0, y: 0, width: 540, height: hostedHeight())
         panel.setContentSize(hosting.frame.size)
         panel.contentView = hosting
     }
@@ -96,8 +96,8 @@ final class AppSwitcherHUD {
     }
 
     private func hostedHeight() -> CGFloat {
-        let rowHeight: CGFloat = 38
-        let chrome: CGFloat = 80
+        let rowHeight: CGFloat = 64
+        let chrome: CGFloat = 110
         let rows = min(CGFloat(max(entries.count, 1)), 10)
         return chrome + rows * rowHeight
     }
