@@ -29,7 +29,7 @@ struct ClipboardPanelView: View {
     private var header: some View {
         HStack(spacing: 8) {
             Image(systemName: "doc.on.clipboard")
-            Text("Clipboard").font(.headline)
+            Text("MacMenu+").font(.headline)
             Spacer()
             Button {
                 store.clear()
