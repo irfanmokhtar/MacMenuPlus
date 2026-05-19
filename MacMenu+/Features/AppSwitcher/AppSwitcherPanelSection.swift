@@ -6,10 +6,19 @@ struct AppSwitcherPanelSection: View {
     @State private var dragDelta: CGFloat = 0
 
     private static let minHeight: CGFloat = 120
-    private static let maxHeight: CGFloat = 600
+    private static let absoluteMaxHeight: CGFloat = 600
+    /// Vertical budget the panel must leave for the clipboard section + chrome
+    /// (clipboard header + search + min list area + footer + dividers + switcher header/handle).
+    private static let reservedForClipboardAndChrome: CGFloat = 520
+
+    private var dynamicMaxHeight: CGFloat {
+        let screenH = NSScreen.main?.visibleFrame.height ?? 900
+        let available = screenH - Self.reservedForClipboardAndChrome
+        return max(Self.minHeight, min(Self.absoluteMaxHeight, available))
+    }
 
     private var clampedHeight: CGFloat {
-        max(Self.minHeight, min(Self.maxHeight, CGFloat(listHeight) + dragDelta))
+        max(Self.minHeight, min(dynamicMaxHeight, CGFloat(listHeight) + dragDelta))
     }
 
     var body: some View {

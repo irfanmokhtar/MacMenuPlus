@@ -67,7 +67,7 @@ struct ClipboardPanelView: View {
                     }
                 }
             }
-            .frame(maxHeight: 320)
+            .frame(minHeight: 120, maxHeight: 320)
         }
     }
 
