@@ -73,7 +73,11 @@ Chromium/Electron quirk: lazy-AX apps return empty `kAXWindowsAttribute`. `fetch
 
 `Features/AppSwitcher/WindowRowView.swift` is shared between the menu-bar panel section and the HUD via a `Style` enum (`.compact` / `.expanded`). All sizing metrics (icon, fonts, padding, corner radius, selection opacity) switch on `style`. Default is `.compact`; `AppSwitcherHUDView` passes `.expanded`. When tweaking row appearance, edit *both* branches or you'll break one surface.
 
-`Features/AppSwitcher/AppSwitcherPanelSection.swift` has a user-resizable list height: `@AppStorage("appSwitcherListHeight")` (default 220, clamp 120…600). Drag handle below the `ScrollView` accumulates `dragDelta` during `DragGesture` and writes `listHeight` on `onEnded`. `NSCursor.resizeUpDown.push()/pop()` on hover.
+`Features/AppSwitcher/AppSwitcherPanelSection.swift` has a user-resizable list height: `@AppStorage("appSwitcherListHeight")` (default 220). Drag handle below the `ScrollView` accumulates `dragDelta` during `DragGesture` and writes `listHeight` on `onEnded`. `NSCursor.resizeUpDown.push()/pop()` on hover.
+
+Clamp is **dynamic**, not a static constant: `max(minHeight=120, min(absoluteMaxHeight=600, NSScreen.main.visibleFrame.height − reservedForClipboardAndChrome=520))`. The `reservedForClipboardAndChrome` budget exists because the switcher list uses a *fixed* `.frame(height:)` while clipboard's list uses `.frame(maxHeight:)` (flexible) — without the budget, SwiftUI compresses the clipboard list first when the panel exceeds available height, hiding clipboard rows. If you change clipboard chrome (header/search/footer/list cap) or switcher chrome (header/handle/dividers), recompute the 520 reservation.
+
+Defense-in-depth: `Features/Clipboard/ClipboardPanelView.swift` sets `.frame(minHeight: 120, maxHeight: 320)` on its list so the clipboard list cannot collapse below 120pt under VStack pressure even if the budget math drifts.
 
 ### Permissions
 
