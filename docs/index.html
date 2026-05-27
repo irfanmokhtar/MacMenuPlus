@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MacMenu+ — Features</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --ink: #1d1d22;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --line: #e5e7eb;
+    --kbd-bg: #f3f4f6;
+    --kbd-line: #d1d5db;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171b; --card: #1f2127; --ink: #e8e9ed; --muted: #9aa0aa;
+      --accent: #6ea8fe; --line: #2c2f37; --kbd-bg: #2a2d35; --kbd-line: #3a3e48;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "SF Pro Text", Segoe UI, Roboto, sans-serif;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+  header.hero { margin-bottom: 40px; }
+  h1 { font-size: 40px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .tagline { color: var(--muted); font-size: 18px; margin: 0; }
+  h2 {
+    font-size: 24px; margin: 48px 0 4px; letter-spacing: -0.01em;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h3 { font-size: 17px; margin: 24px 0 6px; }
+  .badge { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+    color: #fff; background: var(--accent); padding: 2px 8px; border-radius: 999px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 24px; margin-top: 14px;
+  }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  .muted { color: var(--muted); }
+  a { color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+  td:last-child { text-align: right; white-space: nowrap; }
+  kbd {
+    font: 13px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    background: var(--kbd-bg); border: 1px solid var(--kbd-line);
+    border-bottom-width: 2px; border-radius: 6px; padding: 3px 7px; color: var(--ink);
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 12px; }
+  .tile {
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+    display: flex; justify-content: space-between; align-items: center; gap: 8px; background: var(--card);
+  }
+  .tile span:last-child { color: var(--muted); font: 12px ui-monospace, Menlo, monospace; }
+  .note { border-left: 3px solid var(--accent); padding: 6px 0 6px 16px; margin: 16px 0; color: var(--muted); }
+  footer { margin-top: 56px; color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); padding-top: 20px; }
+  code.inline { font: 13px ui-monospace, Menlo, monospace; background: var(--kbd-bg); padding: 1px 5px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>MacMenu+</h1>
+    <p class="tagline">A macOS menu-bar utility — clipboard history, window switcher, and window tiling in one panel. No Dock icon.</p>
+  </header>
+
+  <p>Everything runs from a single <strong>menu-bar panel</strong> plus global hotkeys. Three features share that panel, stacked top to bottom: <em>Clipboard</em>, <em>Open Windows</em>, and <em>Tile Window</em>.</p>
+
+  <!-- CLIPBOARD -->
+  <h2>📋 Clipboard History</h2>
+  <div class="card">
+    <p>Automatically captures whatever you copy and keeps a searchable, scrollable history.</p>
+    <ul>
+      <li><strong>Text &amp; images</strong> — captured automatically (the pasteboard is polled every 0.5&nbsp;s).</li>
+      <li><strong>Search</strong> — filter the history by typing in the search field.</li>
+      <li><strong>Pin / unpin</strong> — pinned items survive a "clear" and are never evicted by the capacity limit.</li>
+      <li><strong>Configurable capacity</strong> — 10–200 items (default 50), set in Settings. Oldest unpinned items drop off first.</li>
+      <li><strong>Click to copy back</strong> — selecting an item puts it back on the clipboard (without creating a duplicate entry).</li>
+      <li><strong>Clear</strong> — wipe all unpinned items in one click.</li>
+    </ul>
+    <p class="muted">History is in-memory only — it is cleared when you quit. There is no on-disk persistence.</p>
+  </div>
+
+  <!-- SWITCHER -->
+  <h2>🪟 Window Switcher</h2>
+  <div class="card">
+    <p>Lists <strong>every open window across all apps</strong> — not just one per app — and lets you jump straight to any of them. Available two ways:</p>
+    <h3>In the panel — "Open windows"</h3>
+    <ul>
+      <li>A scrollable list of windows; click any row to raise that window.</li>
+      <li><strong>Resizable</strong> — drag the handle below the list to grow/shrink it; the height is remembered.</li>
+    </ul>
+    <h3>HUD overlay (hotkey)</h3>
+    <ul>
+      <li>Press <kbd>⌃⌥Tab</kbd> for a floating switcher overlay, centered on screen.</li>
+      <li>Fully keyboard-driven: <kbd>Tab</kbd> / <kbd>⇧Tab</kbd> and arrow keys to move, <kbd>Return</kbd> to switch, <kbd>Esc</kbd> to cancel.</li>
+      <li>A single <kbd>Tab</kbd> jumps to the next window — classic <kbd>⌘Tab</kbd> behavior.</li>
+    </ul>
+    <p>Includes <strong>minimized and hidden</strong> windows, and correctly handles Chromium/Electron apps (Chrome, Slack, VS Code) that expose their windows lazily.</p>
+    <div class="note">Raising a <em>specific</em> window (vs. just focusing the app) requires Accessibility permission. Without it, the switcher can still bring the app forward.</div>
+  </div>
+
+  <!-- TILING -->
+  <h2>🔲 Window Tiling <span class="badge">New</span></h2>
+  <div class="card">
+    <p>Snap the active window into halves, quarters, maximize, or center — including the quarter positions macOS has no built-in shortcut for.</p>
+    <h3>From the panel — "Tile window"</h3>
+    <p>A grid of buttons applies a tile to the <strong>last app you were using</strong> (opening the panel takes focus, so tiling targets the previously-active window). The header shows which app will be affected.</p>
+    <h3>By hotkey</h3>
+    <p>Tiling hotkeys act on the <strong>current frontmost window</strong>. Defaults follow the popular Rectangle layout:</p>
+    <div class="grid">
+      <div class="tile"><span>Left half</span><span>⌃⌥←</span></div>
+      <div class="tile"><span>Right half</span><span>⌃⌥→</span></div>
+      <div class="tile"><span>Top half</span><span>⌃⌥↑</span></div>
+      <div class="tile"><span>Bottom half</span><span>⌃⌥↓</span></div>
+      <div class="tile"><span>Top-left</span><span>⌃⌥U</span></div>
+      <div class="tile"><span>Top-right</span><span>⌃⌥I</span></div>
+      <div class="tile"><span>Bottom-left</span><span>⌃⌥J</span></div>
+      <div class="tile"><span>Bottom-right</span><span>⌃⌥K</span></div>
+      <div class="tile"><span>Maximize</span><span>⌃⌥↩</span></div>
+      <div class="tile"><span>Center</span><span>⌃⌥C</span></div>
+    </div>
+    <p class="muted" style="margin-top:14px;">Multi-monitor aware (tiles within the display the window is on) and respects the menu bar / Dock. Every shortcut is editable in Settings.</p>
+    <div class="note">Tiling moves &amp; resizes windows via the Accessibility API, so it needs Accessibility permission to work.</div>
+  </div>
+
+  <!-- HOTKEYS -->
+  <h2>⌨️ All Hotkeys</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>Action</th><th>Default</th></tr></thead>
+      <tbody>
+        <tr><td>Toggle menu-bar panel</td><td><kbd>⌃⌥V</kbd></td></tr>
+        <tr><td>Open window switcher (HUD)</td><td><kbd>⌃⌥Tab</kbd></td></tr>
+        <tr><td>Tile — left half</td><td><kbd>⌃⌥←</kbd></td></tr>
+        <tr><td>Tile — right half</td><td><kbd>⌃⌥→</kbd></td></tr>
+        <tr><td>Tile — top half</td><td><kbd>⌃⌥↑</kbd></td></tr>
+        <tr><td>Tile — bottom half</td><td><kbd>⌃⌥↓</kbd></td></tr>
+        <tr><td>Tile — top-left quarter</td><td><kbd>⌃⌥U</kbd></td></tr>
+        <tr><td>Tile — top-right quarter</td><td><kbd>⌃⌥I</kbd></td></tr>
+        <tr><td>Tile — bottom-left quarter</td><td><kbd>⌃⌥J</kbd></td></tr>
+        <tr><td>Tile — bottom-right quarter</td><td><kbd>⌃⌥K</kbd></td></tr>
+        <tr><td>Tile — maximize</td><td><kbd>⌃⌥↩</kbd></td></tr>
+        <tr><td>Tile — center</td><td><kbd>⌃⌥C</kbd></td></tr>
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:12px;">All shortcuts are rebindable in <strong>Settings → Shortcuts</strong> and <strong>Settings → Tiling</strong>.</p>
+  </div>
+
+  <!-- PERMISSIONS -->
+  <h2>🔐 Permissions &amp; Requirements</h2>
+  <div class="card">
+    <ul>
+      <li><strong>macOS 14+</strong>. Xcode 15+ to build from source.</li>
+      <li><strong>Accessibility permission</strong> powers window raising and tiling. Grant it at
+        <code class="inline">System Settings → Privacy &amp; Security → Accessibility → MacMenu+</code>.
+        The app prompts on first use of a feature that needs it.</li>
+      <li><strong>Not sandboxed</strong> — the Accessibility API is incompatible with App Sandbox.</li>
+      <li><strong>No Dock icon</strong> — runs as a menu-bar accessory (<code class="inline">LSUIElement</code>).</li>
+    </ul>
+  </div>
+
+  <footer>
+    MacMenu+ · SwiftUI + AppKit · single dependency:
+    <a href="https://github.com/sindresorhus/KeyboardShortcuts">KeyboardShortcuts</a>.
+    See <code class="inline">README.md</code> for build instructions.
+  </footer>
+
+</div>
+</body>
+</html>

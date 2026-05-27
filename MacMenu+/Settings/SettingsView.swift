@@ -23,6 +23,19 @@ struct SettingsView: View {
                 KeyboardShortcuts.Recorder("Switch windows:", name: .switchApps)
             }
 
+            Section("Tiling") {
+                KeyboardShortcuts.Recorder("Left half:", name: .tileLeftHalf)
+                KeyboardShortcuts.Recorder("Right half:", name: .tileRightHalf)
+                KeyboardShortcuts.Recorder("Top half:", name: .tileTopHalf)
+                KeyboardShortcuts.Recorder("Bottom half:", name: .tileBottomHalf)
+                KeyboardShortcuts.Recorder("Top-left quarter:", name: .tileTopLeft)
+                KeyboardShortcuts.Recorder("Top-right quarter:", name: .tileTopRight)
+                KeyboardShortcuts.Recorder("Bottom-left quarter:", name: .tileBottomLeft)
+                KeyboardShortcuts.Recorder("Bottom-right quarter:", name: .tileBottomRight)
+                KeyboardShortcuts.Recorder("Maximize:", name: .tileMaximize)
+                KeyboardShortcuts.Recorder("Center:", name: .tileCenter)
+            }
+
             Section("Accessibility") {
                 LabeledContent("Window-raise permission", value: axTrusted ? "Granted" : "Not granted")
                 if !axTrusted {
@@ -45,7 +58,7 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
-        .frame(width: 460, height: 420)
+        .frame(width: 460, height: 640)
         .onAppear {
             axTrusted = AccessibilityPermission.isTrusted
         }

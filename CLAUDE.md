@@ -4,9 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-MacMenu+ — macOS menu-bar utility (SwiftUI + AppKit). Two features share one menu-bar panel:
+MacMenu+ — macOS menu-bar utility (SwiftUI + AppKit). Three features share one menu-bar panel:
 - Clipboard history (text + images, pin/unpin, configurable capacity).
 - App/window switcher (lists every window across regular apps; HUD overlay activated by hotkey).
+- Window tiling (halves/quarters/maximize/center via AX position+size; hotkeys + panel grid).
 
 `LSUIElement = YES` → no Dock icon. Runs entirely from `MenuBarExtra`.
 
@@ -34,14 +35,14 @@ Swift 5.0, single dependency: `KeyboardShortcuts` (SPM, sindresorhus/KeyboardSho
 
 Entry: `MacMenu+/MacMenuPlusApp.swift`
 - `@main MacMenuPlusApp` declares two `Scene`s: `MenuBarExtra` (panel) and `Settings`.
-- `AppDelegate` owns three singletons injected via `.environment`: `ClipboardStore`, `PasteboardMonitor`, `AppSwitcherHUD`.
-- Registers two global hotkeys via `KeyboardShortcuts.Name` (see `Hotkeys/HotkeyNames.swift`): `.togglePanel` (⌃⌥V), `.switchApps` (⌃⌥Tab).
+- `AppDelegate` owns singletons: `ClipboardStore`, `PasteboardMonitor`, `AppSwitcherHUD`, `FrontmostAppTracker`. `ClipboardStore` and `FrontmostAppTracker` are injected via `.environment`; the others are managed directly.
+- Registers global hotkeys via `KeyboardShortcuts.Name` (see `Hotkeys/HotkeyNames.swift`): `.togglePanel` (⌃⌥V), `.switchApps` (⌃⌥Tab), and 10 tiling hotkeys (`.tileLeftHalf` … `.tileCenter`) wired in a loop from `tileHotkeys`.
 
 Layered layout under `MacMenu+/`:
 - `App/RootPanelView.swift` — composes feature sections vertically; fixed 360 width.
-- `Models/` — value types (`ClipboardItem`, `WindowEntry`). `WindowEntry` carries an `AXUIElement` for direct raise.
+- `Models/` — value types (`ClipboardItem`, `WindowEntry`, `WindowTile`). `WindowEntry` carries an `AXUIElement` for direct raise; `WindowTile` is the tiling enum (frames in Cocoa coords).
 - `Services/` — non-UI engines. Each owns one concern; UI consumes through `@Observable` or direct static calls.
-- `Features/<Name>/` — SwiftUI views + per-feature controllers. Two features today: `Clipboard`, `AppSwitcher`.
+- `Features/<Name>/` — SwiftUI views + per-feature controllers. Three features today: `Clipboard`, `AppSwitcher`, `Tiling`.
 - `Settings/SettingsView.swift` — Form-based settings (capacity stepper, hotkey recorders, AX permission state).
 - `Hotkeys/HotkeyNames.swift` — single source for `KeyboardShortcuts.Name` definitions.
 
@@ -79,9 +80,23 @@ Clamp is **dynamic**, not a static constant: `max(minHeight=120, min(absoluteMax
 
 Defense-in-depth: `Features/Clipboard/ClipboardPanelView.swift` sets `.frame(minHeight: 120, maxHeight: 320)` on its list so the clipboard list cannot collapse below 120pt under VStack pressure even if the budget math drifts.
 
+### Window tiling pipeline
+
+`Services/WindowTiler.swift` is the **only** code that *writes* window geometry — sets `kAXPositionAttribute` + `kAXSizeAttribute` (the rest of the AX paths only read frames and raise/unminimize). `WindowTile.frame(in:)` returns the target rect in **Cocoa coords** (bottom-left origin, y up); `WindowTiler` flips it to **AX coords** (top-left origin of the primary display, y down) via `primaryHeight − rect.maxY`. Primary display = the `NSScreen` whose `frame.origin == .zero`.
+
+Three correctness points to preserve:
+- **Set order is position → size → position**. The second position write defeats apps that clamp to a min-size on the first pass (same trick Rectangle uses).
+- Uses `visibleFrame` (not `frame`) so tiles respect the menu bar / Dock.
+- Multi-monitor: picks the screen containing the window's current center (read via AX, converted back to Cocoa). Falls back to `.main`.
+- A minimized target is unminimized first (`kAXMinimizedAttribute = false`).
+
+`Services/FrontmostAppTracker.swift` (`@Observable`) resolves *which* window to tile. It observes `NSWorkspace.didActivateApplicationNotification` and remembers the last-active non-self regular app. `targetPID()` returns the live frontmost app if it isn't us (hotkey path) else `lastActivePID` (panel path — opening the panel makes *us* frontmost). `focusedWindow(pid:)` reads `kAXFocusedWindowAttribute`, forcing `AXManualAccessibility`/`AXEnhancedUserInterface` for Chromium/Electron just like `WindowEnumerator.fetchAXWindows`.
+
+`Features/Tiling/TilingPanelSection.swift` is the panel grid (halves / quarters / max+center rows of bordered buttons); each calls `tracker.tile(tile)`. Hotkeys call the same `tracker.tile`. SF Symbols for the corner buttons are `rectangle.inset.{topleft,topright,bottomleft,bottomright}.filled` (SF Symbols 4+, fine on the 14.0 target).
+
 ### Permissions
 
-App is non-sandboxed (`MacMenu+/MacMenuPlus.entitlements` is empty `<dict/>`); do not enable App Sandbox — it disables the AX API used by the switcher. `AccessibilityPermission.requestIfNeeded()` is called lazily on the first switcher hotkey press, not at launch.
+App is non-sandboxed (`MacMenu+/MacMenuPlus.entitlements` is empty `<dict/>`); do not enable App Sandbox — it disables the AX API used by the switcher and tiler. `AccessibilityPermission.requestIfNeeded()` is called lazily on the first switcher/tiling hotkey press, not at launch.
 
 ### State / observation
 

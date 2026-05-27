@@ -7,6 +7,8 @@ struct RootPanelView: View {
             ClipboardPanelView()
             Divider()
             AppSwitcherPanelSection()
+            Divider()
+            TilingPanelSection()
         }
         .frame(width: 360)
     }
