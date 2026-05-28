@@ -4,6 +4,22 @@ struct ClipboardPanelView: View {
     @Environment(ClipboardStore.self) private var store
     @Environment(\.openSettings) private var openSettings
     @State private var query: String = ""
+    @AppStorage("clipboardListHeight") private var listHeight: Double = 220
+    @State private var dragDelta: CGFloat = 0
+
+    private static let minHeight: CGFloat = 120
+    private static let absoluteMaxHeight: CGFloat = 600
+
+    private var dynamicMaxHeight: CGFloat {
+        let screenH = NSScreen.main?.visibleFrame.height ?? 900
+        // Leave room for the switcher section + chrome (mirrors the switcher's reservation).
+        let available = screenH - 520
+        return max(Self.minHeight, min(Self.absoluteMaxHeight, available))
+    }
+
+    private var clampedHeight: CGFloat {
+        max(Self.minHeight, min(dynamicMaxHeight, CGFloat(listHeight) + dragDelta))
+    }
 
     private var filtered: [ClipboardItem] {
         let src = query.isEmpty ? store.items : store.items.filter {
@@ -67,8 +83,38 @@ struct ClipboardPanelView: View {
                     }
                 }
             }
-            .frame(minHeight: 120, maxHeight: 320)
+            .frame(height: clampedHeight)
+            resizeHandle
         }
+    }
+
+    private var resizeHandle: some View {
+        ZStack {
+            Rectangle()
+                .fill(Color.clear)
+                .frame(height: 8)
+            Capsule()
+                .fill(.tertiary)
+                .frame(width: 28, height: 3)
+        }
+        .contentShape(Rectangle())
+        .onHover { inside in
+            if inside {
+                NSCursor.resizeUpDown.push()
+            } else {
+                NSCursor.pop()
+            }
+        }
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    dragDelta = value.translation.height
+                }
+                .onEnded { _ in
+                    listHeight = Double(clampedHeight)
+                    dragDelta = 0
+                }
+        )
     }
 
     private var empty: some View {

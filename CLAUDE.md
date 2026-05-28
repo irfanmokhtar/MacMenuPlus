@@ -74,11 +74,9 @@ Chromium/Electron quirk: lazy-AX apps return empty `kAXWindowsAttribute`. `fetch
 
 `Features/AppSwitcher/WindowRowView.swift` is shared between the menu-bar panel section and the HUD via a `Style` enum (`.compact` / `.expanded`). All sizing metrics (icon, fonts, padding, corner radius, selection opacity) switch on `style`. Default is `.compact`; `AppSwitcherHUDView` passes `.expanded`. When tweaking row appearance, edit *both* branches or you'll break one surface.
 
-`Features/AppSwitcher/AppSwitcherPanelSection.swift` has a user-resizable list height: `@AppStorage("appSwitcherListHeight")` (default 220). Drag handle below the `ScrollView` accumulates `dragDelta` during `DragGesture` and writes `listHeight` on `onEnded`. `NSCursor.resizeUpDown.push()/pop()` on hover.
+`Features/AppSwitcher/AppSwitcherPanelSection.swift` and `Features/Clipboard/ClipboardPanelView.swift` both have user-resizable list heights: `@AppStorage("appSwitcherListHeight")` and `@AppStorage("clipboardListHeight")` (both default 220). Drag handle below each `ScrollView` accumulates `dragDelta` during `DragGesture` and writes `listHeight` on `onEnded`. `NSCursor.resizeUpDown.push()/pop()` on hover.
 
-Clamp is **dynamic**, not a static constant: `max(minHeight=120, min(absoluteMaxHeight=600, NSScreen.main.visibleFrame.height − reservedForClipboardAndChrome=520))`. The `reservedForClipboardAndChrome` budget exists because the switcher list uses a *fixed* `.frame(height:)` while clipboard's list uses `.frame(maxHeight:)` (flexible) — without the budget, SwiftUI compresses the clipboard list first when the panel exceeds available height, hiding clipboard rows. If you change clipboard chrome (header/search/footer/list cap) or switcher chrome (header/handle/dividers), recompute the 520 reservation.
-
-Defense-in-depth: `Features/Clipboard/ClipboardPanelView.swift` sets `.frame(minHeight: 120, maxHeight: 320)` on its list so the clipboard list cannot collapse below 120pt under VStack pressure even if the budget math drifts.
+Clamp is **dynamic**, not a static constant: `max(minHeight=120, min(absoluteMaxHeight=600, NSScreen.main.visibleFrame.height − 520))`. The 520 budget is the room each section leaves for *the other section + shared chrome* (headers, search, footer, dividers, handles). Both lists now use `.frame(height:)` (fixed) — neither absorbs compression. On tall screens this is fine; on short screens, if both sit near their max, panel can exceed the screen. If you change chrome in either section, recompute the 520 reservation in both files.
 
 ### Window tiling pipeline
 
@@ -107,4 +105,4 @@ App is non-sandboxed (`MacMenu+/MacMenuPlus.entitlements` is empty `<dict/>`); d
 - `internal import AppKit` (Swift 5.9+ access-level imports) is used everywhere AppKit is referenced — keep the modifier; bare `import AppKit` will leak symbols out of the module for files compiled with stricter access checks.
 - Print logging via `[Switcher] …` lines in `WindowEnumerator` is intentional diagnostic output for the AX correlation path. Leave or gate behind a flag; do not silently delete when debugging unrelated issues.
 - No persistence layer for clipboard history — in-memory, cleared on quit (surfaced in Settings UI).
-- UI-state persistence is limited to `@AppStorage` keys (UserDefaults-backed): `appSwitcherListHeight` (resizable open-windows section). Hotkey bindings persist via `KeyboardShortcuts` (also UserDefaults). No custom persistence service.
+- UI-state persistence is limited to `@AppStorage` keys (UserDefaults-backed): `appSwitcherListHeight`, `clipboardListHeight` (both resizable sections). Hotkey bindings persist via `KeyboardShortcuts` (also UserDefaults). No custom persistence service.
